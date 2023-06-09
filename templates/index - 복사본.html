@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-block;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 2s linear infinite;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 30vh; /* Adjusted from 30vh to 100vh to fill the entire height of the viewport. */
+}
+
+form, #serverResponse {
+  width: 100%;
+  max-width: 800px; /* Added a maximum width to prevent elements from becoming too wide on large screens. */
+}
+
+</style>
+</head>
+<script>
+function updateCount() {
+  var textArea = document.getElementById('problemDesc');
+  var charCount = document.getElementById('charCount');
+  charCount.textContent = textArea.value.length + "/2500";
+}
+
+window.onload = function() {
+  document.getElementById('problemDesc').addEventListener('input', updateCount);
+  updateCount();
+}
+
+function submitForm(event) {
+  event.preventDefault();
+  
+  var submitButton = document.getElementById('submitButton');
+  submitButton.innerHTML = "퀴즈 생성중.... <div class='spinner'></div>";
+  
+  var form = document.getElementById('problemForm');
+  var problemDesc = form.problemDesc.value;
+  var problemNum  = form.problemNum.value;
+  var problemType = form.problemType.value;
+  var difficultyLevel = form.difficultyLevel.value;
+  
+  console.log("내용 입력: " + problemDesc);
+  console.log("문제 갯수: " + problemNum);
+  console.log("문제 유형: " + problemType);
+  console.log("난이도: " + difficultyLevel);
+
+  fetch('/gen', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      'problemDesc': problemDesc,
+	  'problemNum' : problemNum,
+      'problemType': problemType,
+      'difficultyLevel': difficultyLevel,
+    }),
+  }).then(response => response.json())
+    .then(data => {
+       console.log(data);
+    var html = '';
+    for(var question in data) {
+       var quiz = data[question];
+       html += '<h3>' + quiz.no + '. ' + quiz.question + '</h3>';
+       html += '<ul>';
+       for(var option in quiz.options) {
+         html += '<li style="list-style-type: none;">' + option + ') ' + quiz.options[option] + '</li>';
+       }
+       html += '</ul>';
+       html += '<p>정답: ' + quiz.correct + '</p>';
+    }
+    document.getElementById('serverResponse').innerHTML = html;
+    submitButton.innerHTML = "퀴즈 생성";
+  });
+}	
+</script>
+<body>
+
+<h2>AI Quiz Maker V0.6</h2>
+
+<form id="problemForm" style="margin-top: 20px;">
+  <label for="problemDesc">내용 입력:</label>  <span id="charCount" style="float: right;"></span><br>
+  <textarea id="problemDesc" name="problemDesc" rows="15" style="width: 100%;" maxlength="2500"></textarea>
+  <br><br>
+  
+  <div style="display: flex; justify-content: space-between; width: 100%;">
+    <div>
+      <label for="problemType">문제 유형:</label><br>
+      <select id="problemType" name="problemType" style="width: 200px; height: 40px;">
+        <option value="type1">4지선다형</option>
+        <option value="type2">참/거짓형</option>
+        <option value="type3">단답형문제</option>
+        <option value="type4">빈칸채우기</option>
+      </select>
+    </div>
+    <div>
+      <label for="problemNum">문제 갯수:</label><br>
+      <select id="problemNum" name="problemNum" style="width: 200px; height: 40px;">
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+      </select>
+    </div>    
+    <div>
+      <label for="difficultyLevel">난이도:</label><br>
+      <select id="difficultyLevel" name="difficultyLevel" style="width: 200px; height: 40px;">
+        <option value="easy">쉬움</option>
+        <option value="medium">중간</option>
+        <option value="hard">어려움</option>
+      </select>
+    </div>
+  </div><br>
+
+  <button id="submitButton" type="button" style="width: 100%; height: 40px;" onclick="submitForm(event)">퀴즈 생성</button>
+</form>
+<div id="serverResponse" style="margin-top: 20px;"></div>
+</body>
+</html>

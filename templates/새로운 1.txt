@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-block;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 2s linear infinite;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Adjusted from 30vh to 100vh to fill the entire height of the viewport. */
+}
+
+form, #serverResponse {
+  width: 50%;
+  max-width: 800px; /* Added a maximum width to prevent elements from becoming too wide on large screens. */
+}
+
+</style>
+</head>
+<!-- your script code goes here -->
+<body>
+<h2>AI Quiz Maker V0.6</h2>
+
+<form id="problemForm" style="margin-top: 20px;">
+  <label for="problemDesc">내용 입력:</label>  <span id="charCount" style="float: right;"></span><br>
+  <textarea id="problemDesc" name="problemDesc" rows="15" style="width: 100%;" maxlength="2500"></textarea>
+  <br><br>
+
+  <div style="display: flex; justify-content: space-between; width: 100%;">
+    <!-- your form inputs go here -->
+  </div><br>
+
+  <button id="submitButton" type="button" style="width: 100%; height: 40px;" onclick="submitForm(event)">퀴즈 생성</button>
+</form>
+<div id="serverResponse" style="margin-top: 20px;"></div>
+</body>
+</html>
